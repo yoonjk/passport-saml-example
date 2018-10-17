@@ -1,0 +1,40 @@
+{
+  "name": "passport-saml-example",
+  "version": "1.0.0",
+  "description": "passport-saml example",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoonjk/passport-saml-example.git"
+  },
+  "keywords": [
+    "saml"
+  ],
+  "author": "Jaeguk Yun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yoonjk/passport-saml-example/issues"
+  },
+  "homepage": "https://github.com/yoonjk/passport-saml-example#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.1.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "http": "0.0.0",
+    "jshint": "^2.9.6",
+    "mocha": "^5.2.0",
+    "morgan": "^1.9.1",
+    "passport": "^0.4.0",
+    "passport-saml": "^0.35.0",
+    "request": "^2.88.0",
+    "serve-favicon": "^2.5.0",
+    "should": "^13.2.3",
+    "sinon": "^7.0.0"
+  }
+}
