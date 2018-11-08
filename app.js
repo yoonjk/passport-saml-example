@@ -11,7 +11,12 @@ var express = require('express')
 const app = express();
 const http = require('http');
 const server = http.createServer();
+const BEGIN_CERTIFICATE = '-----BEGIN CERTIFICATE-----';
+const END_CERTIFICATE = '-----END CERTIFICATE-----';
+let cert = fs.readFileSync('onelogin.pem', 'utf-8').replace(BEGIN_CERTIFICATE, '')
+cert = cert.replace(END_CERTIFICATE, '');
 
+console.log('cert:', cert)
 server.on('request', app);
 
 var users = [
@@ -48,11 +53,10 @@ passport.deserializeUser(function(id, done) {
 passport.use(new SamlStrategy(
   {
     path: '/login/callback',
-    entryPoint: 'https://openidp.feide.no/simplesaml/saml2/idp/SSOService.php',
-    issuer: 'passport-saml',
+    entryPoint: 'https://nexweb-dev.onelogin.com/trust/saml2/http-redirect/slo/858328',
+    issuer: 'https://app.onelogin.com/saml/metadata/c70d0dd3-c063-4018-9a58-3a6a89f29bc7',
     protocol: 'http://',
-    cert: 'MIICizCCAfQCCQCY8tKaMc0BMjANBgkqhkiG9w0BAQUFADCBiTELMAkGA1UEBhMCTk8xEjAQBgNVBAgTCVRyb25kaGVpbTEQMA4GA1UEChMHVU5JTkVUVDEOMAwGA1UECxMFRmVpZGUxGTAXBgNVBAMTEG9wZW5pZHAuZmVpZGUubm8xKTAnBgkqhkiG9w0BCQEWGmFuZHJlYXMuc29sYmVyZ0B1bmluZXR0Lm5vMB4XDTA4MDUwODA5MjI0OFoXDTM1MDkyMzA5MjI0OFowgYkxCzAJBgNVBAYTAk5PMRIwEAYDVQQIEwlUcm9uZGhlaW0xEDAOBgNVBAoTB1VOSU5FVFQxDjAMBgNVBAsTBUZlaWRlMRkwFwYDVQQDExBvcGVuaWRwLmZlaWRlLm5vMSkwJwYJKoZIhvcNAQkBFhphbmRyZWFzLnNvbGJlcmdAdW5pbmV0dC5ubzCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAt8jLoqI1VTlxAZ2axiDIThWcAOXdu8KkVUWaN/SooO9O0QQ7KRUjSGKN9JK65AFRDXQkWPAu4HlnO4noYlFSLnYyDxI66LCr71x4lgFJjqLeAvB/GqBqFfIZ3YK/NrhnUqFwZu63nLrZjcUZxNaPjOOSRSDaXpv1kb5k3jOiSGECAwEAATANBgkqhkiG9w0BAQUFAAOBgQBQYj4cAafWaYfjBU2zi1ElwStIaJ5nyp/s/8B8SAPK2T79McMyccP3wSW13LHkmM1jwKe3ACFXBvqGQN0IbcH49hu0FKhYFM/GPDJcIHFBsiyMBXChpye9vBaTNEBCtU3KjjyG0hRT2mAQ9h+bkPmOvlEo/aH0xR68Z9hw4PF13w=='/*,
-    privateCert: fs.readFileSync('./cert.pem', 'utf-8')*/
+    cert: cert
   },
   function(profile, done) {
     console.log("Auth with", profile);
@@ -102,12 +106,13 @@ app.get('/account', ensureAuthenticated, function(req, res){
   res.render('account', { user: req.user });
 });
 
-app.get('/login',
-  passport.authenticate('saml', { failureRedirect: '/', failureFlash: true }),
-  function(req, res) {
-    res.redirect('/');
-  }
-);
+// Initiates an authentication request with OneLogin
+// The user will be redirect to OneLogin and once authenticated
+// they will be returned to the callback handler below
+app.get('/login', passport.authenticate('saml', {
+  successReturnToOrRedirect: "/"
+}));
+
 
 app.post('/login/callback',
   passport.authenticate('saml', { failureRedirect: '/', failureFlash: true }),
